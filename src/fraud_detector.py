@@ -248,3 +248,37 @@ def explain_transaction(transaction, risk_level, top_n=4):
         )
 
     return reasons
+# --------------------------------------------------
+# Analyze raw transaction
+# --------------------------------------------------
+
+def analyze_raw_transaction(row):
+    """
+    Convert a raw PaySim transaction into model features
+    and run the fraud detection pipeline.
+    """
+
+    transaction = prepare_transaction(
+        step=int(row["step"]),
+        amount=float(row["amount"]),
+        oldbalanceOrg=float(row["oldbalanceOrg"]),
+        newbalanceOrig=float(row["newbalanceOrig"]),
+        oldbalanceDest=float(row["oldbalanceDest"]),
+        newbalanceDest=float(row["newbalanceDest"]),
+        transaction_type=row["type"],
+        recipient_txn_count_before=int(
+            row["recipient_txn_count_before"]
+        ),
+        sender_recipient_count_before=int(
+            row["sender_recipient_count_before"]
+        )
+    )
+
+    result = analyze_transaction(transaction)
+
+    return {
+        "fraud_probability": result["fraud_probability"],
+        "anomaly_score": result["anomaly_score"],
+        "risk_level": result["risk_level"],
+        "transaction": transaction
+    }
